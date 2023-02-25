@@ -22,4 +22,13 @@ app.get("/", function (req, res, next) {
   }
 });
 
+app.get("/count", (req, res, next) => {
+  if (req.session.num === undefined) {
+    req.session.num = 1;
+  } else {
+    req.session.num = req.session.num + 1;
+  }
+  res.send(`Views : ${req.session.num}`);
+});
+
 app.listen(3000, () => console.log("listening port 3000"));
