@@ -16,10 +16,11 @@ app.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 }, store: new 
 const userData = {
   id: "hello",
   password: "1234",
+  nickname: "asdfg",
 };
 
 // Access the session as req.session
-app.get("/", function (req, res, next) {
+app.get("/", function (req, res) {
   if (req.session.views) {
     req.session.views++;
     res.setHeader("Content-Type", "text/html");
@@ -32,7 +33,7 @@ app.get("/", function (req, res, next) {
   }
 });
 
-app.get("/count", (req, res, next) => {
+app.get("/count", (req, res) => {
   if (req.session.num === undefined) {
     req.session.num = 1;
   } else {
@@ -41,25 +42,39 @@ app.get("/count", (req, res, next) => {
   res.send(`Views : ${req.session.num}`);
 });
 
-app.get("/login", (req, res, next) => {
-  res.send(`
-  <form action="/login_process" method="post" >
-    <p>ID : <input type="text" placeholder="id" name="id" /></p>
-    <p>PW : <input type="password" placeholder="password" name="password" /></p>
-    <p><input type="submit" value="login"/></p>
-  </form>
-  `);
+app.get("/login", (req, res) => {
+  if (req.session.isLogin) {
+    res.send(`<a href="/logout">logout</a>`);
+  } else {
+    res.send(`
+    <form action="/login_process" method="post" >
+      <p>ID : <input type="text" placeholder="id" name="id" /></p>
+      <p>PW : <input type="password" placeholder="password" name="password" /></p>
+      <p><input type="submit" value="login"/></p>
+    </form>
+    `);
+  }
 });
 
-app.post("/login_process", (req, res, next) => {
+app.get("logout", (req, res) => {
+  req.session.destroy((err) => {
+    res.redirect("/");
+  });
+});
+
+app.post("/login_process", (req, res) => {
   const body = req.body;
   const id = body.id;
   const pwd = body.password;
 
   if (id === userData.id && pwd === userData.password) {
-    res.send("Welcome");
+    req.session.isLogin = true;
+    req.session.nickname = userData.nickname;
+    res.send(req.session.isLogin);
+    res.send(req.session.nickname);
+    res.redirect("/login");
   } else {
-    res.send("Wrong!");
+    res.redirect("/login");
   }
 });
 
