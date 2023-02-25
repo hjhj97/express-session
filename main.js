@@ -7,8 +7,16 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 // Use the session middleware
 app.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 }, store: new FileStore() }));
+
+const userData = {
+  id: "hello",
+  password: "1234",
+};
 
 // Access the session as req.session
 app.get("/", function (req, res, next) {
@@ -31,6 +39,28 @@ app.get("/count", (req, res, next) => {
     req.session.num = req.session.num + 1;
   }
   res.send(`Views : ${req.session.num}`);
+});
+
+app.get("/login", (req, res, next) => {
+  res.send(`
+  <form action="/login_process" method="post" >
+    <p>ID : <input type="text" placeholder="id" name="id" /></p>
+    <p>PW : <input type="password" placeholder="password" name="password" /></p>
+    <p><input type="submit" value="login"/></p>
+  </form>
+  `);
+});
+
+app.post("/login_process", (req, res, next) => {
+  const body = req.body;
+  const id = body.id;
+  const pwd = body.password;
+
+  if (id === userData.id && pwd === userData.password) {
+    res.send("Welcome");
+  } else {
+    res.send("Wrong!");
+  }
 });
 
 app.listen(3000, () => console.log("listening port 3000"));
