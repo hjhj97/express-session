@@ -1,12 +1,14 @@
 const express = require("express");
 const session = require("express-session");
+const FileStore = require("session-file-store")(session);
+
 const app = express();
 
 const cors = require("cors");
 app.use(cors());
 
 // Use the session middleware
-app.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 } }));
+app.use(session({ secret: "keyboard cat", cookie: { maxAge: 60000 }, store: new FileStore() }));
 
 // Access the session as req.session
 app.get("/", function (req, res, next) {
